@@ -1,0 +1,95 @@
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 200;
+  src: url('SourceSansPro-ExtraLight.woff') format('woff');
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Source Sans Pro', sans-serif;
+  background: black;
+  color: black;
+}
+
+a {
+  outline: none;
+}
+
+/* HEADER
+************/
+
+#header {
+  padding: 4px;
+  letter-spacing: 2px;
+  overflow: hidden;
+}
+
+#header h1 {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 2.5em;
+  text-align: center;
+  font-weight: 200;
+  font-variant: small-caps;
+  line-height: 0.9;
+}
+
+#header a {
+  color: #aaa;
+  text-decoration: none;
+}
+
+#header nav {
+  display: none;
+}
+
+/* PHOTOGALLERY
+******************/
+
+#album {
+  clear: both;
+  line-height: 0;
+  font-size: 0;
+}
+
+#album img {
+  border: none;
+  margin-bottom: 4px;
+  margin-left: 4px;
+}
+
+.pswp__button--fs {
+  display: none !important;
+}
+
+/* FOOTER
+************/
+
+#footer {
+  color: #aaa;
+  clear: both;
+  font-size: 0.8em;
+  padding: 1em;
+}
+
+#footer p {
+  font-size: 1.25em;
+  letter-spacing: 0.5px;
+  line-height: 160%;
+  hyphens: auto;
+  margin: 0;
+  padding-bottom: 1em;
+}
+
+#footer a {
+  color: #aaa;
+}
+
+#footer strong {
+  font-weight: 200;
+  font-variant: small-caps;
+  font-size: 1.2em;
+  letter-spacing: 1px;
+}

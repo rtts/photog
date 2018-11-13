@@ -50,5 +50,5 @@ are:
 - `sort = random` to randomize the order of photos
 
 ### Zipping (new!)
-- `zipping = true` creates a zipfile called `all.zip` in each album
+- `zipping = true` creates a zipfile called `all.zip` of each album
 - `zipping = false` disables the creation of zipfiles

@@ -16,7 +16,13 @@ def create_website():
     '''Walks the directory tree and generates indexes and thumbnails, but only if they don't exist yet
 '''
     for (dir, dirs, files) in os.walk('.'):
-        if dir.startswith('./static') or os.path.basename(dir) == 'thumbnails':
+        if dir.startswith('./.'):
+            continue
+        if dir.startswith('./static'):
+            continue
+        if os.path.basename(dir) == 'thumbnails':
+            continue
+        if not any([file.lower().endswith('.jpg') for file in files]):
             continue
 
         # Create empty thumbnails dir and photog.ini file

@@ -74,23 +74,39 @@ def generate_index(dir, files):
             continue
         try:
             date = im._getexif()[36867]
-            original_width, original_height = im.size
         except:
             date = ''
-            original_width = 1
-            original_height = 1
         try:
             update_file = os.path.getmtime(os.path.join(dir, large_thumbnail)) < os.path.getmtime(path)
         except:
             update_file = True
 
+        try:
+            original_width, original_height = im.size
+        except:
+            original_width = 1
+            original_height = 1
+
         # Generate S, M and L thumbnails
         if(update_file):
-            im.thumbnail((L,9999))
+            try:
+                orientation = im._getexif()[274]
+                if orientation == 3 :
+                    im = im.rotate(180, expand=True)
+                elif orientation == 6 :
+                    im = im.rotate(-90, expand=True)
+                    original_width, original_height = original_height, original_width
+                elif orientation == 8 :
+                    im = im.rotate(90, expand=True)
+                    original_width, original_height = original_height, original_width
+            except:
+                pass
+
+            im.thumbnail((9999,L))
             im.save(os.path.join(dir, large_thumbnail), quality=95)
-            im.thumbnail((M,9999))
+            im.thumbnail((9999,M))
             im.save(os.path.join(dir, medium_thumbnail), quality=95)
-            im.thumbnail((S,9999))
+            im.thumbnail((9999,S))
             im.save(os.path.join(dir, small_thumbnail), quality=95)
 
         # Add original and large thumbnail to zip archive

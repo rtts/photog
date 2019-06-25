@@ -7,9 +7,11 @@ from natsort import natsorted
 from configparser import ConfigParser
 
 S = 500
-M = 1000
-L = 2000
-
+M = 2000
+L = 4000
+DEFAULT_OPTIONS = '''sort = ascending
+zipping = true
+'''
 T = Template(open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r').read())
 
 def create_website():
@@ -86,11 +88,11 @@ def generate_index(dir, files):
 
         # Generate S, M and L thumbnails
         if(update_file):
-            im.thumbnail((L,9999))
+            im.thumbnail((L,99999))
             im.save(os.path.join(dir, large_thumbnail), quality=95)
-            im.thumbnail((M,9999))
+            im.thumbnail((M,99999))
             im.save(os.path.join(dir, medium_thumbnail), quality=95)
-            im.thumbnail((S,9999))
+            im.thumbnail((S,99999))
             im.save(os.path.join(dir, small_thumbnail), quality=95)
 
         # Add original and large thumbnail to zip archive
@@ -117,6 +119,7 @@ def generate_index(dir, files):
         print(path)
 
     if options['zipping']:
+        print(zippath)
         zipfile.close()
 
     if options['sort'] == 'ascending':
@@ -141,6 +144,10 @@ def read_inifile(inifile):
     '''Reads options from an ini file. Sets default values as well.
 '''
     options = {}
+    if not os.path.exists(inifile) or not os.path.getsize(inifile):
+        with open(inifile, 'w') as f:
+            f.write(DEFAULT_OPTIONS)
+
     if os.path.exists(inifile):
         cfg = ConfigParser()
         with open(inifile) as stream:

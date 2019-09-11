@@ -76,9 +76,11 @@ def generate_index(dir, files):
             continue
         try:
             date = im._getexif()[36867]
-            original_width, original_height = im.size
         except:
             date = ''
+        try:
+            original_width, original_height = im.size
+        except:
             original_width = 1
             original_height = 1
         try:

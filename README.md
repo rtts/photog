@@ -22,17 +22,16 @@ system by running the following command:
 
     $ python3
 
-Once you have Python 3, you can easily install Photog! easily using
-`pip`:
+Once you have Python 3, you can install Photog! using `pip`:
 
-    $ pip install https://www.github.com/rtts/photog
+    $ pip install git+https://www.github.com/rtts/photog
 
 Depending on your operating system, you might have to substitute `pip`
 for `pip3`. Depending on your local configuration, you might have to
 run the command as root using `sudo`. So, if the previous command
 didn't work, try this one:
 
-    $ sudo pip3 install https://www.github.com/rtts/photog
+    $ sudo pip3 install git+https://www.github.com/rtts/photog
 
 
 Usage

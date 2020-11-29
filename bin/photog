@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+import os, sys
+import photog
+from shutil import copytree
+
+if __name__ == '__main__':
+    root = sys.argv[1:2] or ['.']
+    photog.create_website(root[0])
+    static_dir = os.path.join(os.path.dirname(photog.__file__), 'static')
+    copytree(static_dir, 'static', dirs_exist_ok=True)

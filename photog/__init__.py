@@ -9,15 +9,24 @@ from configparser import ConfigParser
 S = 500
 M = 2000
 L = 4000
+TEMPLATE_NAME = 'template.html'
 DEFAULT_OPTIONS = '''sort = ascending
 zipping = true
 '''
-T = Template(open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r').read())
 
-def create_website():
-    '''Walks the directory tree and generates indexes and thumbnails, but only if they don't exist yet
-'''
-    for (dir, dirs, files) in os.walk('.'):
+if os.path.exists(TEMPLATE_NAME):
+    template_path = TEMPLATE_NAME
+else:
+    template_path = os.path.join(os.path.dirname(__file__), TEMPLATE_NAME)
+T = Template(open(template_path, 'r').read())
+
+def create_website(root='.'):
+    '''
+    Walk the directory tree and generate indexes and thumbnails, but
+    only if they don't exist yet
+
+    '''
+    for (dir, dirs, files) in os.walk(root):
         if dir.startswith('./.'):
             continue
         if dir.startswith('./static'):
@@ -49,8 +58,10 @@ def create_website():
             generate_index(dir, files)
 
 def generate_index(dir, files):
-    '''Processes all photos in a directory and generates an index.html.
-'''
+    '''
+    Process all photos in a directory and generate index.html
+
+    '''
     photos = []
     inifile = os.path.join(dir, 'photog.ini')
     options = read_inifile(inifile)
@@ -162,6 +173,3 @@ def read_inifile(inifile):
         options['sort'] = 'ascending'
         options['zipping'] = True
     return options
-
-if __name__ == '__main__':
-    create_website()

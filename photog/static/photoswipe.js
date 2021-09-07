@@ -1,77 +1,4 @@
-// Make the gallery object globally accessible
-// (it is assigned below in the function openPhotoSwipe())
-var gallery;
-
-if (document.addEventListener) {
-    document.addEventListener('webkitfullscreenchange', exitHandler, false);
-    document.addEventListener('mozfullscreenchange', exitHandler, false);
-    document.addEventListener('fullscreenchange', exitHandler, false);
-    document.addEventListener('MSFullscreenChange', exitHandler, false);
-}
-
-function exitHandler(event) {
-    if (document.fullscreenElement || document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement) {
-        console.log('user entered fullscreen');
-        if ('ontouchstart' in document.documentElement) {
-            gallery.ui.hideControls();
-        } else {
-            gallery.ui.setIdle(true);
-        }
-    }
-    else {
-        gallery.close();
-        damnresize();
-        console.log('user exited fullscreen');
-    }
-}
-
-function fullscreen(yes) {
-    var doc = document
-    var docEl = doc.documentElement;
-
-    if (yes) {
-
-        // Switch to fullscreen mode
-        var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-        if (requestFullScreen) {
-            requestFullScreen.call(docEl);
-        }
-
-        // Lock orientation to landscape (on mobile)
-        if (window.screen.orientation && window.screen.orientation.lock) {
-            window.screen.orientation.lock('landscape');
-        }
-    }
-
-    else {
-        var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-        if (cancelFullScreen) {
-            cancelFullScreen.call(doc);
-        }
-    }
-
-    damnresize();
-}
-
-function damnresize() {
-    // Fire off a bunch of resize events because switching to fullscreen messes up the layout...
-    if(typeof(Event) === 'function') {
-        var resizeEvent = new Event('resize');
-    } else {
-        var resizeEvent = document.createEvent('Event');
-        resizeEvent.initEvent('resize', true, true);
-    }
-    timeouts = [0, 100, 500, 1000, 2000, 3000, 4000];
-    for (var i=0; i < timeouts.length; i++) {
-        setTimeout(function() {
-            window.dispatchEvent(resizeEvent);
-        }, timeouts[i]);
-    }
-}
-
-
 var initPhotoSwipeFromDOM = function(gallerySelector) {
-
     var parseThumbnailElements = function(el) {
         var thumbElements = el.childNodes,
             numNodes = thumbElements.length,
@@ -207,9 +134,8 @@ var initPhotoSwipeFromDOM = function(gallerySelector) {
     };
 
     var openPhotoSwipe = function(index, galleryElement, disableAnimation, fromURL) {
-        fullscreen(true);
         var pswpElement = document.querySelectorAll('.pswp')[0],
-//		gallery,
+	    gallery,
             options,
             items;
 
@@ -239,10 +165,7 @@ var initPhotoSwipeFromDOM = function(gallerySelector) {
             },
 
             shareButtons: [
-                {id:'download', label:'Share on Facebook', url:'https://www.facebook.com/sharer/sharer.php?u={{url}}'},
-                {id:'download', label:'Share on Twitter', url:'https://twitter.com/intent/tweet?text={{text}}&url={{url}}'},
-                {id:'download', label:'Download this image', url:'{{raw_image_url}}', download:true},
-                {id:'download', label:'Download ALL images', url:'all.zip', download:true},
+                {id:'download', label:'Download image', url:'{{raw_image_url}}', download:true},
             ],
             bgOpacity: 1,
             barsSize: {top:0, bottom:0},
@@ -361,9 +284,15 @@ var initPhotoSwipeFromDOM = function(gallerySelector) {
 
         gallery.listen('close', function() {
             document.documentElement.style.overflow = 'auto';
+
+            // Fire window resize event to restore the layout
+            window.dispatchEvent(new Event('resize'));
         });
 
         gallery.init();
+
+        // Enter fullscreen immediately
+        gallery.ui.getFullscreenAPI().enter();
     };
 
     // select all gallery elements
@@ -381,4 +310,3 @@ var initPhotoSwipeFromDOM = function(gallerySelector) {
 };
 
 initPhotoSwipeFromDOM('#album');
-damnresize();

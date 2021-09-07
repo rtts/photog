@@ -46,28 +46,8 @@ function resize_images() {
     }
 }
 
-function imageTitle(obj) {
-    var img = obj.el.children('img');
-    var title = img.attr('alt');
-    return title;
-}
-
-/*
-function exitHandler() {
-    if (document.webkitIsFullScreen === false || document.mozFullScreen === false || document.msFullscreenElement === false) {
-        $.magnificPopup.close()
-    }
-}
-
-if (document.addEventListener) {
-    document.addEventListener('webkitfullscreenchange', exitHandler, false);
-    document.addEventListener('mozfullscreenchange', exitHandler, false);
-    document.addEventListener('fullscreenchange', exitHandler, false);
-    document.addEventListener('MSFullscreenChange', exitHandler, false);
-}
-*/
-
 $(function() {
     $(window).on('resize', resize_images);
     resize_images();
 });
+

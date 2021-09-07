@@ -90,9 +90,3 @@ your Pictures folder and edit as needed. Then, running `photog` will
 use your customized template instead of the default one.
 
 [4]: https://raw.githubusercontent.com/rtts/photog/master/photog/template.html
-
-
-
-
-
-

@@ -1,6 +1,6 @@
-/*! PhotoSwipe Default UI - 4.1.2 - 2017-04-05
+/*! PhotoSwipe Default UI - 4.1.3 - 2019-01-08
 * http://photoswipe.com
-* Copyright (c) 2017 Dmitry Semenov; */
+* Copyright (c) 2019 Dmitry Semenov; */
 /**
 *
 * UI on top of main sliding area (caption, arrows, close button, etc.).
@@ -84,7 +84,7 @@ var PhotoSwipeUI_Default =
 				{id:'download', label:'Download image', url:'{{raw_image_url}}', download:true}
 			],
 			getImageURLForShare: function( /* shareButtonData */ ) {
-				return pswp.currItem.original || '';
+				return pswp.currItem.src || '';
 			},
 			getPageURLForShare: function( /* shareButtonData */ ) {
 				return window.location.href;

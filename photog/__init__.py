@@ -7,8 +7,8 @@ from natsort import natsorted
 from configparser import ConfigParser
 
 S = 500
-M = 2000
-L = 4000
+M = 1000
+L = 2000
 TEMPLATE_NAME = 'template.html'
 DEFAULT_OPTIONS = '''sort = ascending
 zipping = true

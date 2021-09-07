@@ -291,8 +291,11 @@ var initPhotoSwipeFromDOM = function(gallerySelector) {
 
         gallery.init();
 
-        // Enter fullscreen immediately
+        // Enter fullscreen
         gallery.ui.getFullscreenAPI().enter();
+
+        // Hide controls
+        gallery.ui.setIdle(true);
     };
 
     // select all gallery elements

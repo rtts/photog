@@ -1,47 +1,83 @@
 Photog!
 =======
 
-Photog! turns a directory tree of source images into a photography
-website with nested albums of chronologically sorted photographs. It
-is created by [Jaap Joris Vens][1] who uses it for
-[his personal photography website][2].
+**Photog! turns a directory tree of source images into a photography
+website with nested albums of chronologically sorted photographs.**
 
-This version of Photog! has been completely rewritten in Python.
-You can still find [the original Perl version on GitHub][3].
+It was created by
+[Return to the Source](https://returntothesource.nl/en/)
+for
+[Super Formosa Photography](https://www.superformosa.nl/)
+and provided here for everyone to use under the terms of the
+[AGPL](https://www.gnu.org/licenses/agpl-3.0.html)
+license as part of our
+[free and open source philosophy](https://www.gnu.org/licenses/copyleft.en.htm)l.
 
-[1]: https://www.jaapjoris.nl/
-[2]: https://www.superformosa.nl/
-[3]: https://github.com/rtts/photog-perl
+![Screenshot of Super Formosa Photography](https://raw.githubusercontent.com/rtts/photog/main/www.superformosa.nl.png)
+
+
+Features
+--------
+
+Photog! stands on the shoulders of giants.
+
+- The thumbnails are displayed in a responsive gallery that
+  recalculates the correct image dimensions in an aesthetically
+  pleasing way, thanks to the algorithm from
+  <https://github.com/ptgamr/google-image-layout>.
+
+- Clicking a thumbnail opens the [PhotoSwipe](https://photoswipe.com/)
+  gallery by @dimsemenov, with the following features of its own:
+  - Touch gestures
+  - Browser History API
+  - Progressive loading
+  - Fullscreen support
+  - Share button
+
+- Adding `/all.zip` to the end of the URL will download a ZIP file
+  containing all the images in two different resolutions:
+  1. The original images, unmodified, in the subfolder "print"
+  2. Images scaled to a width of 2000 pixels, in the subfolder "web"
+
+- The default template shows the logo <span
+  style="font-variant:small-caps">Super Formosa Photography</span>
+  at the top and license terms at the bottom. To override this, see
+  the section "Customization" below.
 
 
 Installation
 ------------
 
-Photog! requires Python 3. You can check if this is available on your
-system by running the following command:
+Photog! requires Python 3.8 or higher. You can check if this is
+available on your system by running the following command:
 
-    $ python3
+    $ python3 --version
 
-Once you have Python 3, you can install Photog! using `pip`:
+Then, create a [virtual environment](https://docs.python.org/3/library/venv.html):
+
+    $ mkdir -p ~/.virtualenvs
+    $ python3 -m venv ~/.virtualenvs/photog
+    $ . ~/.virtualenvs/photog/bin/activate
+
+This is not strictly necessary, but good practice.
+
+Now you can install Photog! with `pip`:
 
     $ pip install git+https://www.github.com/rtts/photog
-
-Depending on your operating system, you might have to substitute `pip`
-for `pip3`. Depending on your local configuration, you might have to
-run the command as root using `sudo`. So, if the previous command
-didn't work, try this one:
-
-    $ sudo pip3 install git+https://www.github.com/rtts/photog
 
 
 Usage
 -----
 
-First, navigate to your Pictures directory using `cd`:
+First, activate your virtual environment:
+
+    $ . ~/.virtualenvs/bin/activate
+
+Then, navigate to your Pictures directory:
 
     $ cd ~/Pictures
 
-Then, run the `photog` command:
+Now, run the `photog` command:
 
     $ photog
 
@@ -75,6 +111,11 @@ configuration variables per album. The configuration options are:
 - `zipping = true` creates a zipfile called `all.zip` of each album
 - `zipping = false` disables the creation of zipfiles
 
+The default configuration is:
+
+    sort = ascending
+    zipping = true
+
 To change the configuration of a particular directory, open the file
 `photog.ini` in a text editor and change the values. Photog! will not
 overwrite pre-existing configuration files.
@@ -83,10 +124,9 @@ overwrite pre-existing configuration files.
 Customization
 -------------
 
-Since you probably don't want your website to have _Super Formosa
-Photography_ in the header of every page, you should customize [the
-default template][4]. Save this file as `template.html` in the root of
-your Pictures folder and edit as needed. Then, running `photog` will
-use your customized template instead of the default one.
+It is expected that you customize [the default template][1]. Save this
+file as `template.html` in the root of your Pictures folder and edit
+as needed. Then, run `photog` to use your customized template instead
+of the default one.
 
-[4]: https://raw.githubusercontent.com/rtts/photog/master/photog/template.html
+[1]: https://raw.githubusercontent.com/rtts/photog/master/photog/template.html

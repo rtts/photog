@@ -3556,7 +3556,7 @@ var _historyUpdateTimeout,
 			// carry forward any custom pid assigned to the item
 			pid = item.pid;
 		}
-		var newHash = _initialHash + '&'  +  'gid=' + _options.galleryUID + '&' + 'pid=' + pid;
+	    var newHash = pid;
 
 		if(!_historyChanged) {
 			if(_windowLoc.hash.indexOf(newHash) === -1) {

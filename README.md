@@ -1,17 +1,18 @@
 Photog!
 =======
 
-**Photog! turns a directory tree of source images into a photography
-website with nested albums of chronologically sorted photographs.**
+**Photog! turns a directory tree of source images into a beautiful
+photography website that maximizes the ease of both viewing and
+downloading the pictures.**
 
-It was created by
+Photog! was created by
 [Return to the Source](https://returntothesource.nl/en/)
 for
 [Super Formosa Photography](https://www.superformosa.nl/)
 and provided here for everyone to use under the terms of the
 [AGPL](https://www.gnu.org/licenses/agpl-3.0.html)
 license as part of our
-[free and open source philosophy](https://www.gnu.org/licenses/copyleft.en.htm)l.
+[free and open source philosophy](https://www.gnu.org/licenses/copyleft.en.html).
 
 ![Screenshot of Super Formosa Photography](https://raw.githubusercontent.com/rtts/photog/main/www.superformosa.nl.png)
 

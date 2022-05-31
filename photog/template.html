@@ -1,71 +1,71 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Super Formosa Photography</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="/static/main.css">
-    <link rel="stylesheet" href="/static/photoswipe/photoswipe.css">
-    <link rel="stylesheet" href="/static/photoswipe/default-skin/default-skin.css">
-    <script src="/static/photoswipe/photoswipe.js"></script>
-    <script src="/static/photoswipe/photoswipe-ui-default.js"></script>
-    <script src="/static/jquery-3.6.0.min.js"></script>
-    <script src="/static/superformosa.js" defer></script>
-    <script src="/static/photoswipe.js" defer></script>
-  </head>
-  <body>
+    <head>
+        <title>Super Formosa Photography</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="/static/main.css">
+        <link rel="stylesheet" href="/static/photoswipe/photoswipe.css">
+        <link rel="stylesheet" href="/static/photoswipe/default-skin/default-skin.css">
+        <script src="/static/photoswipe/photoswipe.js"></script>
+        <script src="/static/photoswipe/photoswipe-ui-default.js"></script>
+        <script src="/static/jquery-3.6.0.min.js"></script>
+        <script src="/static/superformosa.js" defer></script>
+        <script src="/static/photoswipe.js" defer></script>
+    </head>
+    <body>
 
-    <div id="header">
-      <h1><a href="/">Super Formosa Photography</a></h1>
-    </div>
-
-    <div id="album">
-      {% for photo in photos %}
-        <a class="photolink" title="Click image to enlarge" href="{{photo.original}}" data-large="{{photo.large}}" data-large-size="{{photo.l_width}}x{{photo.l_height}}" data-medium="{{photo.medium}}" data-medium-size="{{photo.m_width}}x{{photo.m_height}}"><img alt="{{photo.name}}" width="{{photo.s_width}}" height="{{photo.s_height}}" data-width="{{photo.s_width}}" data-height="{{photo.s_height}}" src="{{photo.small}}"></a>
-      {% endfor %}
-    </div>
-
-    <div id="footer">
-      <p>
-        Deze foto’s zijn <strong>©Super Formosa Photography</strong> en worden aangeboden onder de <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> licentievoorwaarden.<br>
-      </p>
-    </div>
-
-    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="pswp__bg"></div>
-      <div class="pswp__scroll-wrap">
-        <div class="pswp__container">
-          <div class="pswp__item"></div>
-          <div class="pswp__item"></div>
-          <div class="pswp__item"></div>
+        <div id="header">
+            <h1><a href="/">Super Formosa Photography</a></h1>
         </div>
-        <div class="pswp__ui pswp__ui--hidden">
-          <div class="pswp__top-bar">
-            <div class="pswp__counter"></div>
-            <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-            <button class="pswp__button pswp__button--share" title="Share"></button>
-            <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-            <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-            <div class="pswp__preloader">
-              <div class="pswp__preloader__icn">
-                <div class="pswp__preloader__cut">
-                  <div class="pswp__preloader__donut"></div>
+
+        <div id="album">
+            {% for photo in photos %}
+                <a class="photolink" title="Click image to enlarge" href="{{photo.original}}" data-large="{{photo.large}}" data-large-size="{{photo.l_width}}x{{photo.l_height}}" data-medium="{{photo.medium}}" data-medium-size="{{photo.m_width}}x{{photo.m_height}}"><img alt="{{photo.basename}}" width="{{photo.s_width}}" height="{{photo.s_height}}" data-width="{{photo.s_width}}" data-height="{{photo.s_height}}" src="{{photo.small}}"></a>
+            {% endfor %}
+        </div>
+
+        <div id="footer">
+            <p>
+                Deze foto’s zijn <strong>©Super Formosa Photography</strong> en worden aangeboden onder de <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> licentievoorwaarden.<br>
+            </p>
+        </div>
+
+        <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="pswp__bg"></div>
+            <div class="pswp__scroll-wrap">
+                <div class="pswp__container">
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
+                    <div class="pswp__item"></div>
                 </div>
-              </div>
+                <div class="pswp__ui pswp__ui--hidden">
+                    <div class="pswp__top-bar">
+                        <div class="pswp__counter"></div>
+                        <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                        <button class="pswp__button pswp__button--share" title="Share"></button>
+                        <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                        <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                        <div class="pswp__preloader">
+                            <div class="pswp__preloader__icn">
+                                <div class="pswp__preloader__cut">
+                                    <div class="pswp__preloader__donut"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                        <div class="pswp__share-tooltip"></div>
+                    </div>
+                    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                    </button>
+                    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                    </button>
+                    <div class="pswp__caption">
+                        <div class="pswp__caption__center"></div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-            <div class="pswp__share-tooltip"></div>
-          </div>
-          <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-          </button>
-          <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-          </button>
-          <div class="pswp__caption">
-            <div class="pswp__caption__center"></div>
-          </div>
         </div>
-      </div>
-    </div>
-  </body>
+    </body>
 </html>

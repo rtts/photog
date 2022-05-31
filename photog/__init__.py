@@ -1,175 +1,179 @@
 #!/usr/bin/env python3
-import os, io, random
-from PIL import Image
-from jinja2 import Template
-from zipfile import ZipFile
-from natsort import natsorted
+import io
+import os
+import random
 from configparser import ConfigParser
+from glob import glob
+from zipfile import ZipFile
+
+from jinja2 import Template
+from PIL import Image
 
 S = 500
 M = 1000
 L = 2000
-TEMPLATE_NAME = 'template.html'
-DEFAULT_OPTIONS = '''sort = ascending
-zipping = true
-'''
+TEMPLATE_NAME = "template.html"
 
 if os.path.exists(TEMPLATE_NAME):
     template_path = TEMPLATE_NAME
 else:
     template_path = os.path.join(os.path.dirname(__file__), TEMPLATE_NAME)
-T = Template(open(template_path, 'r').read())
+T = Template(open(template_path, "r").read())
 
-def create_website(root='.'):
-    '''
-    Walk the directory tree and generate indexes and thumbnails, but
-    only if they don't exist yet
 
-    '''
+def create_website(root="."):
+    """
+    Walk the directory tree, rename images, and generate indexes.
+    """
+
     for (dir, dirs, files) in os.walk(root):
-        if dir.startswith('./.'):
+        if dir.startswith("./."):
             continue
-        if dir.startswith('./static'):
+        if dir.startswith("./static"):
             continue
-        if os.path.basename(dir) == 'thumbnails':
+        if os.path.basename(dir) == "thumbnails":
             continue
-        if not any([file.lower().endswith('.jpg') for file in files]):
+        if not any([file.lower().endswith(".jpg") for file in files]):
             continue
 
-        # Create empty thumbnails dir and photog.ini file
-        os.makedirs(os.path.join(dir, 'thumbnails'), exist_ok=True)
-        open(os.path.join(dir, 'photog.ini'), 'a').close()
+        os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
+        photos = rename_images(dir)
+        generate_index(dir, photos)
 
-        # Only generate index.html if needed
-        try:
-            if not os.path.exists(os.path.join(dir, 'index.html')):
-                generate_index(dir, files)
-            elif os.path.getmtime(os.path.join(dir, 'index.html')) < os.path.getmtime(os.path.join(dir, 'photog.ini')):
-                generate_index(dir, files)
-            else:
-                for file in files:
-                    if not file.lower().endswith('.jpg'):
-                        continue
-                    name = os.path.splitext(file)[0]
-                    if os.path.getmtime(os.path.join(dir, 'thumbnails', name + ' (large)' + '.jpg')) < os.path.getmtime(os.path.join(dir, file)):
-                        generate_index(dir, files)
-                        break
-        except:
-            generate_index(dir, files)
 
-def generate_index(dir, files):
-    '''
-    Process all photos in a directory and generate index.html
+def rename_images(dir):
+    """
+    Rename images sequentially.
+    """
 
-    '''
-    photos = []
-    inifile = os.path.join(dir, 'photog.ini')
+    inifile = os.path.join(dir, "photog.ini")
     options = read_inifile(inifile)
-    zippath = os.path.join(dir, 'all.zip')
-    if options['zipping']:
-        zipfile = ZipFile(zippath, 'w')
+
+    # Store Exif DateTimeOriginal
+    photos = []
+    for image in glob("*.jpg", root_dir=dir):
+        basename = image.split(".", maxsplit=1)[0]
+        im = Image.open(os.path.join(dir, image))
+        date = im._getexif()[36867]
+        photos.append(
+            {
+                "basename": basename,
+                "date": date,
+            }
+        )
+
+        # Rename
+        for alt in glob(f"{basename}.*", root_dir=dir):
+            ext = alt.split(".", maxsplit=1)[1]
+            src = os.path.join(dir, alt)
+            dst = os.path.join(dir, f"_{alt}")
+            os.rename(src, dst)
+
+    # Sort
+    if options.get("sort") == "random":
+        random.shuffle(photos)
+    else:
+        photos.sort(key=lambda p: p["date"])
+        if options.get("sort") == "descending":
+            photos.reverse()
+
+    # Re-rename
+    for counter, image in enumerate(photos):
+        basename = image["basename"]
+        for alt in glob(f"_{basename}.*", root_dir=dir):
+            ext = alt.split(".", maxsplit=1)[1]
+            src = os.path.join(dir, alt)
+            dst = os.path.join(dir, f"{counter+1}.{ext}")
+            os.rename(src, dst)
+        image["basename"] = str(counter + 1)
+
+    return photos
+
+
+def generate_index(dir, photos):
+    """
+    Generate index.html
+    """
+
+    inifile = os.path.join(dir, "photog.ini")
+    options = read_inifile(inifile)
+    zippath = os.path.join(dir, "all.zip")
+    if options.get("zip", True):
+        zipfile = ZipFile(zippath, "w")
     elif os.path.exists(zippath):
         os.remove(zippath)
 
-    for file in natsorted(files):
-        if not file.lower().endswith('.jpg'):
-            continue
-        name = os.path.splitext(file)[0]
-        path = os.path.join(dir, file)
-        small_thumbnail = os.path.join('thumbnails', name + ' (small)' + '.jpg')
-        medium_thumbnail = os.path.join('thumbnails', name + ' (medium)' + '.jpg')
-        large_thumbnail = os.path.join('thumbnails', name + ' (large)' + '.jpg')
-
-        # Carefully open image and extract metadata
-        try:
-            im = Image.open(path)
-        except:
-            continue
-        try:
-            date = im._getexif()[36867]
-        except:
-            date = ''
-        try:
-            original_width, original_height = im.size
-        except:
-            original_width = 1
-            original_height = 1
-        try:
-            update_file = os.path.getmtime(os.path.join(dir, large_thumbnail)) < os.path.getmtime(path)
-        except:
-            update_file = True
+    for image in photos:
+        basename = image["basename"]
+        filename = f"{basename}.jpg"
+        path = os.path.join(dir, filename)
+        small_thumbnail = os.path.join("thumbnails", f"{basename} (small).jpg")
+        medium_thumbnail = os.path.join("thumbnails", f"{basename} (medium).jpg")
+        large_thumbnail = os.path.join("thumbnails", f"{basename} (large).jpg")
+        im = Image.open(path)
+        original_width, original_height = im.size
+        exif = im.info["exif"]
 
         # Generate S, M and L thumbnails
-        if(update_file):
-            im.thumbnail((L,99999))
-            im.save(os.path.join(dir, large_thumbnail), quality=95)
-            im.thumbnail((M,99999))
-            im.save(os.path.join(dir, medium_thumbnail), quality=95)
-            im.thumbnail((S,99999))
-            im.save(os.path.join(dir, small_thumbnail), quality=95)
+        im.thumbnail((L, 99999))
+        im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
+        im.thumbnail((M, 99999))
+        im.save(os.path.join(dir, medium_thumbnail), quality=95, exif=exif)
+        im.thumbnail((S, 99999))
+        im.save(os.path.join(dir, small_thumbnail), quality=95, exif=exif)
 
         # Add original and large thumbnail to zip archive
-        if options['zipping']:
-            zipfile.write(path, os.path.join('print', file))
-            zipfile.write(os.path.join(dir, large_thumbnail), os.path.join('web', file))
+        if options.get("zip", True):
+            zipfile.write(path, os.path.join("print", filename))
+            zipfile.write(
+                os.path.join(dir, large_thumbnail), os.path.join("web", filename)
+            )
 
-        photos.append({
-            'name': name,
-            'date': date,
-            'small': small_thumbnail,
-            'medium': medium_thumbnail,
-            'large': large_thumbnail,
-            'original': file,
-            'raw': name + '.dng',
-            's_height': S,
-            'm_height': M,
-            'l_height': L,
-            's_width': int((S / original_height) * original_width),
-            'm_width': int((M / original_height) * original_width),
-            'l_width': int((L / original_height) * original_width),
-        })
+        image.update(
+            {
+                "small": small_thumbnail,
+                "medium": medium_thumbnail,
+                "large": large_thumbnail,
+                "original": filename,
+                "s_height": S,
+                "m_height": M,
+                "l_height": L,
+                "s_width": int((S / original_height) * original_width),
+                "m_width": int((M / original_height) * original_width),
+                "l_width": int((L / original_height) * original_width),
+            }
+        )
 
         print(path)
 
-    if options['zipping']:
+    if options.get("zip", True):
         print(zippath)
         zipfile.close()
 
-    if options['sort'] == 'ascending':
-        photos.sort(key=lambda p: p['date'])
-    if options['sort'] == 'descending':
-        photos.sort(key=lambda p: p['date'], reverse=True)
-    if options['sort'] == 'alphabetical':
-        pass # files were already sorted
-    if options['sort'] == 'random':
-        random.shuffle(photos)
-
-    index = T.render({
-        'photos': photos,
-    })
+    index = T.render(
+        {
+            "photos": photos,
+        }
+    )
 
     try:
-        open(os.path.join(dir, 'index.html'), 'w').write(index)
+        open(os.path.join(dir, "index.html"), "w").write(index)
     except:
-        print('Couldn’t write to ' + dir)
+        print("Couldn’t write to " + dir)
+
 
 def read_inifile(inifile):
-    '''Reads options from an ini file. Sets default values as well.
-'''
-    options = {}
-    if not os.path.exists(inifile) or not os.path.getsize(inifile):
-        with open(inifile, 'w') as f:
-            f.write(DEFAULT_OPTIONS)
+    """
+    Read options from an ini file.
+    """
 
+    options = {}
     if os.path.exists(inifile):
         cfg = ConfigParser()
         with open(inifile) as stream:
-            stream = io.StringIO('[root]\n' + stream.read())
+            stream = io.StringIO("[root]\n" + stream.read())
             cfg.read_file(stream)
-        root = cfg['root']
-        options['sort'] = root.get('sort', 'ascending')
-        options['zipping'] = root.get('zip', 'true').lower() in ['true', 'yes', 'on']
-    else:
-        options['sort'] = 'ascending'
-        options['zipping'] = True
+        root = cfg["root"]
+        options["sort"] = root.get("sort", "ascending")
+        options["zip"] = root.get("zip", "true").lower() in ["true", "yes", "on"]
     return options

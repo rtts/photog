@@ -445,11 +445,11 @@
             {
                 name: 'button--share',
                 option: 'shareEl',
-                onInit: function(el) {
-                    _shareButton = el;
-                },
                 onTap: function() {
-                    _toggleShareModal();
+                    var a = document.createElement('a');
+                    a.href = pswp.currItem.original;
+                    a.download = pswp.currItem.original;
+                    a.click();
                 }
             },
             {

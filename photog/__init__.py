@@ -114,13 +114,18 @@ def generate_index(dir, photos):
         original_width, original_height = im.size
         exif = im.info["exif"]
 
-        # Generate S, M and L thumbnails
-        im.thumbnail((L, 99999))
-        im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
-        im.thumbnail((M, 99999))
-        im.save(os.path.join(dir, medium_thumbnail), quality=95, exif=exif)
-        im.thumbnail((S, 99999))
-        im.save(os.path.join(dir, small_thumbnail), quality=95, exif=exif)
+        try:
+            update_file = os.path.getmtime(os.path.join(dir, large_thumbnail)) < os.path.getmtime(path)
+        except:
+            update_file = True
+        if update_file:
+            # Generate S, M and L thumbnails
+            im.thumbnail((L, 99999))
+            im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
+            im.thumbnail((M, 99999))
+            im.save(os.path.join(dir, medium_thumbnail), quality=95, exif=exif)
+            im.thumbnail((S, 99999))
+            im.save(os.path.join(dir, small_thumbnail), quality=95, exif=exif)
 
         # Add original and large thumbnail to zip archive
         if options.get("zip", True):

@@ -11,4 +11,4 @@ if __name__ == "__main__":
         static_dir = os.path.join(os.path.dirname(photog.__file__), "static")
         copytree(static_dir, os.path.join(root[0], "static"), dirs_exist_ok=True)
     else:
-        photog.create_website(".")
+        sys.exit(photog.create_website("."))

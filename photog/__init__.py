@@ -26,6 +26,10 @@ def create_website(root="."):
     Walk the directory tree, rename images, and generate indexes.
     """
 
+    # Somewhat unfair, but it's nice to say
+    # `if photog; then aws s3 sync` in Bash
+    exit_status = 1
+
     for (dir, dirs, files) in os.walk(root):
         if dir.startswith("./."):
             continue
@@ -36,9 +40,27 @@ def create_website(root="."):
         if not any([file.lower().endswith(".jpg") for file in files]):
             continue
 
-        os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
-        photos = rename_images(dir)
-        generate_index(dir, photos)
+        if not os.path.exists(os.path.join(dir, "index.html")):
+            exit_status = 0
+            process_directory(dir)
+        else:
+            for image in glob("*.jpg", root_dir=dir):
+                basename = image.split(".", maxsplit=1)[0]
+                if os.path.getmtime(
+                    os.path.join(dir, "thumbnails", basename + " (large)" + ".jpg")
+                ) < os.path.getmtime(os.path.join(dir, image)):
+                    exit_status = 0
+                    process_directory(dir)
+                    break
+
+    return exit_status
+
+
+def process_directory(dir):
+    print(f"Processing {dir}...")
+    os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
+    photos = rename_images(dir)
+    generate_index(dir, photos)
 
 
 def rename_images(dir):
@@ -115,11 +137,14 @@ def generate_index(dir, photos):
         exif = im.info["exif"]
 
         try:
-            update_file = os.path.getmtime(os.path.join(dir, large_thumbnail)) < os.path.getmtime(path)
+            update_file = os.path.getmtime(
+                os.path.join(dir, large_thumbnail)
+            ) < os.path.getmtime(path)
         except:
             update_file = True
         if update_file:
             # Generate S, M and L thumbnails
+            print(f"Generating thumbnails for {path}...")
             im.thumbnail((L, 99999))
             im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
             im.thumbnail((M, 99999))
@@ -149,10 +174,8 @@ def generate_index(dir, photos):
             }
         )
 
-        print(path)
-
     if options.get("zip", True):
-        print(zippath)
+        print("(Re)creating all.zip...")
         zipfile.close()
 
     index = T.render(

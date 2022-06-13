@@ -57,7 +57,6 @@ def create_website(root="."):
 
 
 def process_directory(dir):
-    print(f"Processing {dir}...")
     os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
     photos = rename_images(dir)
     generate_index(dir, photos)

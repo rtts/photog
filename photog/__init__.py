@@ -74,8 +74,11 @@ def rename_images(dir):
     photos = []
     for image in glob("*.jpg", root_dir=dir):
         basename = image.split(".", maxsplit=1)[0]
-        im = Image.open(os.path.join(dir, image))
-        date = im._getexif()[36867]
+        try:
+            im = Image.open(os.path.join(dir, image))
+            date = im._getexif()[36867]
+        except:
+            continue
         photos.append(
             {
                 "basename": basename,
@@ -88,6 +91,8 @@ def rename_images(dir):
             ext = alt.split(".", maxsplit=1)[1]
             src = os.path.join(dir, alt)
             dst = os.path.join(dir, f"_{alt}")
+            if os.path.exists(dst):
+                raise FileExistsError(dst)
             os.rename(src, dst)
 
     # Sort
@@ -105,6 +110,8 @@ def rename_images(dir):
             ext = alt.split(".", maxsplit=1)[1]
             src = os.path.join(dir, alt)
             dst = os.path.join(dir, f"{counter+1}.{ext}")
+            if os.path.exists(dst):
+                raise FileExistsError(dst)
             os.rename(src, dst)
         image["basename"] = str(counter + 1)
 
@@ -177,16 +184,8 @@ def generate_index(dir, photos):
         print("(Re)creating all.zip...")
         zipfile.close()
 
-    index = T.render(
-        {
-            "photos": photos,
-        }
-    )
-
-    try:
-        open(os.path.join(dir, "index.html"), "w").write(index)
-    except:
-        print("Couldn’t write to " + dir)
+    index = T.render({"photos": photos})
+    open(os.path.join(dir, "index.html"), "w").write(index)
 
 
 def read_inifile(inifile):

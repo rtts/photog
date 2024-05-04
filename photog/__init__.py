@@ -11,7 +11,7 @@ from PIL import Image
 
 S = 500
 M = 1000
-L = 2000
+L = 2160
 TEMPLATE_NAME = "template.html"
 
 if os.path.exists(TEMPLATE_NAME):
@@ -46,9 +46,8 @@ def create_website(root="."):
         else:
             for image in glob("*.jpg", root_dir=dir):
                 basename = image.split(".", maxsplit=1)[0]
-                if os.path.getmtime(
-                    os.path.join(dir, "thumbnails", basename + " (large)" + ".jpg")
-                ) < os.path.getmtime(os.path.join(dir, image)):
+                thumbnail = os.path.join(dir, "thumbnails", basename + " (large)" + ".jpg")
+                if not os.path.exists(thumbnail) or os.path.getmtime(thumbnail) < os.path.getmtime(os.path.join(dir, image)):
                     exit_status = 0
                     process_directory(dir)
                     break
@@ -74,11 +73,11 @@ def rename_images(dir):
     photos = []
     for image in glob("*.jpg", root_dir=dir):
         basename = image.split(".", maxsplit=1)[0]
+        im = Image.open(os.path.join(dir, image))
         try:
-            im = Image.open(os.path.join(dir, image))
             date = im._getexif()[36867]
         except:
-            continue
+            date = "zzz"  # Sort images without EXIF date last
         photos.append(
             {
                 "basename": basename,

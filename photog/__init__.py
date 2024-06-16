@@ -9,9 +9,8 @@ from zipfile import ZipFile
 from jinja2 import Template
 from PIL import Image
 
-S = 500
-M = 1000
-L = 2160
+S = 500  # for album
+L = 2160  # for homepage
 TEMPLATE_NAME = "template.html"
 
 if os.path.exists(TEMPLATE_NAME):
@@ -40,6 +39,8 @@ def create_website(root="."):
         if not any([file.lower().endswith(".jpg") for file in files]):
             continue
 
+        # Process directory once, entirely, if either index.html or a
+        # single thumbnail is off.
         if not os.path.exists(os.path.join(dir, "index.html")):
             exit_status = 0
             process_directory(dir)
@@ -135,13 +136,14 @@ def generate_index(dir, photos):
         filename = f"{basename}.jpg"
         path = os.path.join(dir, filename)
         small_thumbnail = os.path.join("thumbnails", f"{basename} (small).jpg")
-        medium_thumbnail = os.path.join("thumbnails", f"{basename} (medium).jpg")
         large_thumbnail = os.path.join("thumbnails", f"{basename} (large).jpg")
         im = Image.open(path)
         original_width, original_height = im.size
         exif = im.info["exif"]
 
         try:
+            raise  # because the following leads to thumbnail
+                   # mismatches when renaming images:
             update_file = os.path.getmtime(
                 os.path.join(dir, large_thumbnail)
             ) < os.path.getmtime(path)
@@ -152,30 +154,22 @@ def generate_index(dir, photos):
             print(f"Generating thumbnails for {path}...")
             im.thumbnail((L, 99999))
             im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
-            im.thumbnail((M, 99999))
-            im.save(os.path.join(dir, medium_thumbnail), quality=95, exif=exif)
             im.thumbnail((S, 99999))
             im.save(os.path.join(dir, small_thumbnail), quality=95, exif=exif)
 
-        # Add original and large thumbnail to zip archive
+        # Add original to zip archive
         if options.get("zip", True):
-            zipfile.write(path, os.path.join("print", filename))
-            zipfile.write(
-                os.path.join(dir, large_thumbnail), os.path.join("web", filename)
-            )
+            zipfile.write(path, os.path.join(filename))
 
         image.update(
             {
                 "small": small_thumbnail,
-                "medium": medium_thumbnail,
-                "large": large_thumbnail,
+                # "large": large_thumbnail,
                 "original": filename,
                 "s_height": S,
-                "m_height": M,
-                "l_height": L,
+                "height": original_height,
                 "s_width": int((S / original_height) * original_width),
-                "m_width": int((M / original_height) * original_width),
-                "l_width": int((L / original_height) * original_width),
+                "width": original_width,
             }
         )
 

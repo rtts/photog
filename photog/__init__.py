@@ -2,6 +2,7 @@
 import io
 import os
 import random
+import subprocess
 from configparser import ConfigParser
 from glob import glob
 from zipfile import ZipFile
@@ -70,15 +71,15 @@ def rename_images(dir):
     inifile = os.path.join(dir, "photog.ini")
     options = read_inifile(inifile)
 
-    # Store Exif DateTimeOriginal
     photos = []
+    print("Renumbering by EXIF date", end="", flush=True)
     for image in glob("*.jpg", root_dir=dir):
+        print(f".", end="", flush=True)
         basename = image.split(".", maxsplit=1)[0]
-        im = Image.open(os.path.join(dir, image))
-        try:
-            date = im._getexif()[36867]
-        except:
-            date = "zzz"  # Sort images without EXIF date last
+
+        # Shell out because &^%$#@! Python can't figure this out...
+        date = subprocess.check_output(f"exiftool {image} | grep 'Date/Time Original' | tail -1 | sed 's/.*: //'", shell=True).decode('utf-8').strip()
+
         photos.append(
             {
                 "basename": basename,
@@ -94,6 +95,8 @@ def rename_images(dir):
             if os.path.exists(dst):
                 raise FileExistsError(dst)
             os.rename(src, dst)
+
+    print()
 
     # Sort
     if options.get("sort") == "random":
@@ -131,6 +134,7 @@ def generate_index(dir, photos):
     elif os.path.exists(zippath):
         os.remove(zippath)
 
+    print("Generating thumbnails", end="", flush=True)
     for image in photos:
         basename = image["basename"]
         filename = f"{basename}.jpg"
@@ -151,7 +155,7 @@ def generate_index(dir, photos):
             update_file = True
         if update_file:
             # Generate S, M and L thumbnails
-            print(f"Generating thumbnails for {path}...")
+            print(".", end="", flush=True)
             im.thumbnail((L, 99999))
             im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
             im.thumbnail((S, 99999))
@@ -173,10 +177,13 @@ def generate_index(dir, photos):
             }
         )
 
+    print()
+
     if options.get("zip", True):
-        print("(Re)creating all.zip...")
+        print("Writing zipfile...")
         zipfile.close()
 
+    print("Writing index.html...")
     index = T.render({"photos": photos})
     open(os.path.join(dir, "index.html"), "w").write(index)
 

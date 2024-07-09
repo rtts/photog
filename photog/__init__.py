@@ -78,7 +78,7 @@ def rename_images(dir):
         basename = image.split(".", maxsplit=1)[0]
 
         # Shell out because &^%$#@! Python can't figure this out...
-        date = subprocess.check_output(["exiftool", "-SubSecDateTimeOriginal", image]).decode('utf-8').strip()
+        date = subprocess.check_output(["exiftool", "-SubSecDateTimeOriginal", "-DateTimeOriginal", os.path.join(dir, image)]).decode('utf-8').strip()
 
         photos.append(
             {

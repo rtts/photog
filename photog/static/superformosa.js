@@ -1,53 +1,58 @@
-HEIGHTS = [];
-MAX_HEIGHT = 183;
+"use strict";
+document.addEventListener("DOMContentLoaded", () => {
+    const MARGIN = 4
+    const MAX_HEIGHT = 183;
+    const IMAGES = document.querySelectorAll('#album img, #album video');
 
-function getheight(images, width) {
-    width -= images.length * 5;
-    var h = 0;
-    for (var i = 0; i < images.length; ++i) {
-        h += $(images[i]).data('width') / $(images[i]).data('height');
-    }
-    return width / h;
-}
-
-function setheight(images, height) {
-    HEIGHTS.push(height);
-    for (var i = 0; i < images.length; ++i) {
-        $(images[i]).css({
-            width: height * $(images[i]).data('width') / $(images[i]).data('height'),
-            height: height
-        });
-        $(images[i]).attr('src', $(images[i]).attr('src').replace(/w[0-9]+-h[0-9]+/, 'w' + $(images[i]).width() + '-h' + $(images[i]).height()));
-    }
-}
-
-function resize(images, width) {
-    setheight(images, getheight(images, width));
-}
-
-function resize_images() {
-    var size = $('#album').width() - 4;
-    var n = 0;
-    var images = $('#album img, #album video');
-    w: while (images.length > 0) {
-        for (var i = 1; i < images.length + 1; ++i) {
-            var slice = images.slice(0, i);
-            var h = getheight(slice, size);
-            if (h < MAX_HEIGHT) {
-                setheight(slice, h);
-                n++;
-                images = images.slice(i);
-                continue w;
-            }
-        }
-        setheight(slice, Math.min(MAX_HEIGHT, h));
-        n++;
-        break;
-    }
-}
-
-$(function() {
-    $(window).on('resize', resize_images);
     resize_images();
-});
+    window.addEventListener("resize", resize_images);
+    function resize_images() {
+        const size = document.getElementById('album').offsetWidth - MARGIN;
+        let slice;
+        let n = 0;
+        let h = 0;
+        let images = Array.from(IMAGES);
 
+        // You found the top-secret resizing algorithm!
+        w: while (images.length > 0) {
+            for (let i = 1; i < images.length + 1; ++i) {
+                slice = images.slice(0, i);
+                h = get_height(slice, size);
+                if (h < MAX_HEIGHT) {
+                    set_height(slice, h);
+                    n++;
+                    images = images.slice(i);
+                    continue w;
+                }
+            }
+            set_height(slice, Math.min(MAX_HEIGHT, h));
+            n++;
+            break;
+        }
+    }
+
+    function get_height(images, width) {
+        width -= images.length * MARGIN;
+        let h = 0;
+        for (let i = 0; i < images.length; ++i) {
+            const img = images[i];
+            h += img.dataset.width / img.dataset.height;
+        }
+        return width / h;
+    }
+
+    function set_height(images, height) {
+        for (let i = 0; i < images.length; ++i) {
+            const img = images[i];
+            img.style.width = (height * img.dataset.width / img.dataset.height) + 'px';
+            img.style.height = height + 'px';
+        }
+    }
+
+    // TODO: Code a better alternative to Photoswipe. Start with this:
+    // Array.from(IMAGES).forEach(image => image.addEventListener('click', show));
+    // function show(event) {
+    //     const image = event.target;
+    //     event.preventDefault();
+    // }
+});

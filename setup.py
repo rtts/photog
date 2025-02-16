@@ -14,7 +14,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/rtts/photog",
     license="AGPL3",
-    scripts=["bin/photog"],
+    entry_points={
+        "console_scripts": [
+            "photog=photog.__main__:main",
+        ],
+    },
     include_package_data=True,
     packages=setuptools.find_packages(),
     classifiers=[

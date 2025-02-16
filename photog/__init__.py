@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
 import io
 import os
 import random
+import shutil
 import subprocess
 from configparser import ConfigParser
 from glob import glob
@@ -10,8 +10,7 @@ from zipfile import ZipFile
 from jinja2 import Template
 from PIL import Image
 
-S = 500  # for album
-L = 2160  # for homepage
+S = 500
 TEMPLATE_NAME = "template.html"
 
 if os.path.exists(TEMPLATE_NAME):
@@ -40,27 +39,13 @@ def create_website(root="."):
         if not any([file.lower().endswith(".jpg") for file in files]):
             continue
 
-        # Process directory once, entirely, if either index.html or a
-        # single thumbnail is off.
+        # Process directory if index.html is missing.
         if not os.path.exists(os.path.join(dir, "index.html")):
+            photos = rename_images(dir)
+            generate_index(dir, photos)
             exit_status = 0
-            process_directory(dir)
-        else:
-            for image in glob("*.jpg", root_dir=dir):
-                basename = image.split(".", maxsplit=1)[0]
-                thumbnail = os.path.join(dir, "thumbnails", basename + " (large)" + ".jpg")
-                if not os.path.exists(thumbnail) or os.path.getmtime(thumbnail) < os.path.getmtime(os.path.join(dir, image)):
-                    exit_status = 0
-                    process_directory(dir)
-                    break
 
     return exit_status
-
-
-def process_directory(dir):
-    os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
-    photos = rename_images(dir)
-    generate_index(dir, photos)
 
 
 def rename_images(dir):
@@ -135,31 +120,19 @@ def generate_index(dir, photos):
         os.remove(zippath)
 
     print("Generating thumbnails", end="", flush=True)
+    shutil.rmtree(os.path.join(dir, "thumbnails"))
+    os.makedirs(os.path.join(dir, "thumbnails"))
     for image in photos:
         basename = image["basename"]
         filename = f"{basename}.jpg"
         path = os.path.join(dir, filename)
-        small_thumbnail = os.path.join("thumbnails", f"{basename} (small).jpg")
-        large_thumbnail = os.path.join("thumbnails", f"{basename} (large).jpg")
+        thumbnail = os.path.join("thumbnails", f"{basename}.jpg")
         im = Image.open(path)
         original_width, original_height = im.size
         exif = im.info["exif"]
-
-        try:
-            raise  # because the following leads to thumbnail
-                   # mismatches when renaming images:
-            update_file = os.path.getmtime(
-                os.path.join(dir, large_thumbnail)
-            ) < os.path.getmtime(path)
-        except:
-            update_file = True
-        if update_file:
-            # Generate S, M and L thumbnails
-            print(".", end="", flush=True)
-            im.thumbnail((L, 99999))
-            im.save(os.path.join(dir, large_thumbnail), quality=95, exif=exif)
-            im.thumbnail((S, 99999))
-            im.save(os.path.join(dir, small_thumbnail), quality=95, exif=exif)
+        print(".", end="", flush=True)
+        im.thumbnail((S, 99999))
+        im.save(os.path.join(dir, thumbnail), quality=95, exif=exif)
 
         # Add original to zip archive
         if options.get("zip", True):
@@ -167,8 +140,7 @@ def generate_index(dir, photos):
 
         image.update(
             {
-                "small": small_thumbnail,
-                # "large": large_thumbnail,
+                "small": thumbnail,
                 "original": filename,
                 "s_height": S,
                 "height": original_height,

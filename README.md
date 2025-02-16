@@ -24,7 +24,7 @@ Photog! stands on the shoulders of giants.
 
 - The thumbnails are displayed in a responsive gallery that
   recalculates the correct image dimensions in an aesthetically
-  pleasing way, thanks to the algorithm from
+  pleasing way, based on the algorithm from
   <https://github.com/ptgamr/google-image-layout>.
 
 - Clicking a thumbnail opens the [PhotoSwipe](https://photoswipe.com/)
@@ -34,7 +34,6 @@ Photog! stands on the shoulders of giants.
   - Browser History API
   - Progressive loading
   - Fullscreen support
-  - Share button
 
 - Adding `/all.zip` to the end of the URL will download a ZIP file
   containing all the images in two different resolutions:
@@ -67,22 +66,17 @@ First, navigate to your Pictures directory:
 
     $ cd ~/Pictures
 
-Now, run the `photog` command, specifying the current directory (`.`)
-as its argument:
+Now, run the `photog` command:
 
-    $ photog .
+    $ photog
 
 Photog! will now traverse your pictures folder and generate HTML files
 , image thumbnails, and zipfiles. If you want to only update a
 specific subdirectory and not regenerate the entire website, run
-`photog` without arguments inside that directory:
+`photog` inside that directory:
 
     $ cd ~/Pictures/wedding
     $ photog
-
-The difference is that without arguments, Photog! will not create a
-`static` directory to hold the static files. Otherwise the two
-previous commands are identical.
 
 After Photog! has completed its run, you can use Python's built-in
 webserver to view your website:

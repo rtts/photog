@@ -58,7 +58,7 @@ def rename_images(dir):
 
     photos = []
     print("Renumbering by EXIF date", end="", flush=True)
-    for image in glob("*.jpg", root_dir=dir):
+    for image in glob("*.JPEG", root_dir=dir):
         print(f".", end="", flush=True)
         basename = image.split(".", maxsplit=1)[0]
 

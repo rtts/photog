@@ -120,7 +120,7 @@ def generate_index(dir, photos):
         os.remove(zippath)
 
     print("Generating thumbnails", end="", flush=True)
-    shutil.rmtree(os.path.join(dir, "thumbnails"))
+    shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
     os.makedirs(os.path.join(dir, "thumbnails"))
     for image in photos:
         basename = image["basename"]

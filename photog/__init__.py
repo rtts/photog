@@ -47,6 +47,18 @@ def create_website(root="."):
 
     return exit_status
 
+def dont_rename_images(dir):
+    photos = []
+    print("Getting EXIF dates", end="", flush=True)
+    for image in glob("*.JPEG", root_dir=dir):
+        print(f".", end="", flush=True)
+        photos.append({
+            "basename": image.split(".", maxsplit=1)[0],
+            "date": subprocess.check_output(["exiftool", "-SubSecDateTimeOriginal", "-DateTimeOriginal", os.path.join(dir, image)]).decode('utf-8').strip(),
+        })
+    photos.sort(key=lambda p: p["date"])
+    print()
+    return photos
 
 def rename_images(dir):
     """

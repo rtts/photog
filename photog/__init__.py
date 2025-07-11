@@ -50,7 +50,7 @@ def create_website(root="."):
 def dont_rename_images(dir):
     photos = []
     print("Getting EXIF dates", end="", flush=True)
-    for image in glob("*.JPEG", root_dir=dir):
+    for image in glob("*.jpg", root_dir=dir):
         print(f".", end="", flush=True)
         photos.append({
             "basename": image.split(".", maxsplit=1)[0],
@@ -70,7 +70,7 @@ def rename_images(dir):
 
     photos = []
     print("Renumbering by EXIF date", end="", flush=True)
-    for image in glob("*.JPEG", root_dir=dir):
+    for image in glob("*.jpg", root_dir=dir):
         print(f".", end="", flush=True)
         basename = image.split(".", maxsplit=1)[0]
 

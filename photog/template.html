@@ -20,7 +20,7 @@
 
         <div id="album">
             {% for photo in photos %}
-                <a class="photolink" title="Click image to enlarge" href="{{photo.original}}" data-large="{{photo.original}}" data-large-size="{{photo.width}}x{{photo.height}}" data-medium="{{photo.original}}" data-medium-size="{{photo.width}}x{{photo.height}}"><img alt="{{photo.basename}}" width="{{photo.s_width}}" height="{{photo.s_height}}" data-width="{{photo.s_width}}" data-height="{{photo.s_height}}" src="{{photo.small}}"></a>
+                <a class="photolink" href="{{photo.original}}" data-large="{{photo.original}}" data-large-size="{{photo.width}}x{{photo.height}}" data-medium="{{photo.original}}" data-medium-size="{{photo.width}}x{{photo.height}}"><img alt="{{photo.basename}}" width="{{photo.s_width}}" height="{{photo.s_height}}" data-width="{{photo.s_width}}" data-height="{{photo.s_height}}" src="{{photo.small}}"></a>
             {% endfor %}
         </div>
 

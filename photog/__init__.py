@@ -134,21 +134,25 @@ def generate_index(dir, photos):
     print("Generating thumbnails", end="", flush=True)
     shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
     os.makedirs(os.path.join(dir, "thumbnails"))
+
+    photos_and_cinemagraphs = []
     for image in photos:
+        print(".", end="", flush=True)
         basename = image["basename"]
         filename = f"{basename}.jpg"
         path = os.path.join(dir, filename)
-        thumbnail = os.path.join("thumbnails", f"{basename}.jpg")
-        im = Image.open(path)
-        original_width, original_height = im.size
-        exif = im.info["exif"]
-        print(".", end="", flush=True)
-        im.thumbnail((S, 99999))
-        im.save(os.path.join(dir, thumbnail), quality=95, exif=exif)
+        thumbnail = os.path.join("thumbnails", filename)
 
-        # Add original to zip archive
+        # Create thumbnail.
+        with Image.open(path) as im:
+            original_width, original_height = im.size
+            exif = im.info["exif"]
+            im.thumbnail((S, 99999))
+            im.save(os.path.join(dir, thumbnail), quality=95, exif=exif)
+
+        # Add original to zip archive.
         if options.get("zip", True):
-            zipfile.write(path, os.path.join(filename))
+            zipfile.write(path, filename)
 
         image.update(
             {
@@ -160,6 +164,23 @@ def generate_index(dir, photos):
                 "width": original_width,
             }
         )
+        photos_and_cinemagraphs.append(image)
+
+        # Insert cinemagraph if exists:
+        if os.path.exists(f"{basename}.avif"):
+            filename = f"{basename}.avif"
+            if options.get("zip", True):
+                zipfile.write(os.path.join(dir, filename), filename)
+
+            photos_and_cinemagraphs.append({
+                "basename": basename,
+                "small": filename,
+                "original": filename,
+                "s_height": S,
+                "height": 1080,
+                "s_width": int((S / 1080) * 1920),
+                "width": 1920,
+            })
 
     print()
 
@@ -168,7 +189,7 @@ def generate_index(dir, photos):
         zipfile.close()
 
     print("Writing index.html...")
-    index = T.render({"photos": photos})
+    index = T.render({"photos": photos_and_cinemagraphs})
     open(os.path.join(dir, "index.html"), "w").write(index)
 
 

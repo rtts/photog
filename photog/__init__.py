@@ -54,7 +54,10 @@ def dont_rename_images(dir):
             "filename": filename,
             "basename": filename.split(".", maxsplit=1)[0],
         })
-    photos.sort(key=lambda p: int(p["basename"]))
+    try:
+        photos.sort(key=lambda p: int(p["basename"]))
+    except ValueError:
+        photos.sort(key=lambda p: p["basename"])
     if options.get("sort") == "descending":
         photos.reverse()
     if options.get("sort") == "random":

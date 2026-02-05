@@ -8,7 +8,7 @@ from glob import glob
 from zipfile import ZipFile
 
 from jinja2 import Template
-from PIL import Image
+from PIL import Image, ImageFilter
 
 S = 500
 TEMPLATE_NAME = "template.html"
@@ -95,8 +95,15 @@ def generate_index(dir, photos):
                 exif = im.info["exif"]
             except:
                 exif = None
-            im.thumbnail((S, 99999))
-            im.save(os.path.join(dir, thumbnail), quality=95, exif=exif)
+            im.thumbnail((S, 99999), Image.Resampling.LANCZOS)
+
+            # Apply *very* gentle output sharpening.
+            im = im.filter(ImageFilter.UnsharpMask(
+                radius = 0.5,
+                percent = 100,
+                threshold = 0,
+            ))
+            im.save(os.path.join(dir, thumbnail), quality=80, exif=exif)
 
         # Add original to zip archive.
         if options.get("zip", True):

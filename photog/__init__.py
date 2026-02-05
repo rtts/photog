@@ -80,9 +80,10 @@ def generate_index(dir, photos):
     elif os.path.exists(zippath):
         os.remove(zippath)
 
-    print("Generating thumbnails", end="", flush=True)
     shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
-    os.makedirs(os.path.join(dir, "thumbnails"))
+    if photos:
+        os.makedirs(os.path.join(dir, "thumbnails"))
+        print("Generating thumbnails", end="", flush=True)
 
     for image in photos:
         print(".", end="", flush=True)
@@ -97,13 +98,13 @@ def generate_index(dir, photos):
                 exif = im.info["exif"]
             except:
                 exif = None
-            im.thumbnail((S, 99999), Image.Resampling.LANCZOS)
+            im.thumbnail((99999, S), Image.Resampling.LANCZOS)
 
             # Apply *very* gentle output sharpening.
             im = im.filter(
                 ImageFilter.UnsharpMask(
-                    radius=0.5,
-                    percent=100,
+                    radius=1,
+                    percent=33,
                     threshold=0,
                 )
             )
@@ -124,7 +125,8 @@ def generate_index(dir, photos):
             }
         )
 
-    print()
+    if photos:
+        print()
 
     if options.get("zip", True):
         print("Writing zipfile...")

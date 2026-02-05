@@ -2,7 +2,6 @@ import io
 import os
 import random
 import shutil
-import subprocess
 from configparser import ConfigParser
 from glob import glob
 from zipfile import ZipFile
@@ -29,7 +28,7 @@ def create_website(root="."):
     # `if photog; then aws s3 sync` in Bash
     exit_status = 1
 
-    for (dir, dirs, files) in os.walk(root):
+    for dir, dirs, files in os.walk(root):
         if dir.startswith("./."):
             continue
         if dir.startswith("./static"):
@@ -45,15 +44,18 @@ def create_website(root="."):
 
     return exit_status
 
+
 def dont_rename_images(dir):
     inifile = os.path.join(dir, "photog.ini")
     options = read_inifile(inifile)
     photos = []
     for filename in glob("*.jpg", root_dir=dir) + glob("*.avif", root_dir=dir):
-        photos.append({
-            "filename": filename,
-            "basename": filename.split(".", maxsplit=1)[0],
-        })
+        photos.append(
+            {
+                "filename": filename,
+                "basename": filename.split(".", maxsplit=1)[0],
+            }
+        )
     try:
         photos.sort(key=lambda p: int(p["basename"]))
     except ValueError:
@@ -63,6 +65,7 @@ def dont_rename_images(dir):
     if options.get("sort") == "random":
         random.shuffle(photos)
     return photos
+
 
 def generate_index(dir, photos):
     """
@@ -84,7 +87,6 @@ def generate_index(dir, photos):
     for image in photos:
         print(".", end="", flush=True)
         filename = image["filename"]
-        basename = image["basename"]
         path = os.path.join(dir, filename)
         thumbnail = os.path.join("thumbnails", filename)
 
@@ -98,11 +100,13 @@ def generate_index(dir, photos):
             im.thumbnail((S, 99999), Image.Resampling.LANCZOS)
 
             # Apply *very* gentle output sharpening.
-            im = im.filter(ImageFilter.UnsharpMask(
-                radius = 0.5,
-                percent = 100,
-                threshold = 0,
-            ))
+            im = im.filter(
+                ImageFilter.UnsharpMask(
+                    radius=0.5,
+                    percent=100,
+                    threshold=0,
+                )
+            )
             im.save(os.path.join(dir, thumbnail), quality=80, exif=exif)
 
         # Add original to zip archive.

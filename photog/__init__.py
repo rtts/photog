@@ -94,11 +94,16 @@ def generate_index(dir, photos):
         # Create thumbnail.
         with Image.open(path) as im:
             original_width, original_height = im.size
+
             try:
                 exif = im.info["exif"]
-            except:
-                exif = None
-            im.thumbnail((99999, S), Image.Resampling.LANCZOS)
+            except Exception as e:
+                raise Exception(f"{path} has no EXIF, please re-export.") from e
+
+            try:
+                im.thumbnail((99999, S))
+            except Exception as e:
+                raise Exception(f"{path} is corrupt, please re-export.") from e
 
             # Apply *very* gentle output sharpening.
             im = im.filter(

@@ -9,6 +9,7 @@ from zipfile import ZipFile
 from jinja2 import Template
 from PIL import Image, ImageFilter
 
+Q = 50
 S = 500
 TEMPLATE_NAME = "template.html"
 
@@ -38,18 +39,33 @@ def create_website(root="."):
 
         # Process directory if index.html is missing.
         if not os.path.exists(os.path.join(dir, "index.html")):
-            photos = dont_rename_images(dir)
+            photos = collect_images(dir)
             generate_index(dir, photos)
             exit_status = 0
 
     return exit_status
 
 
-def dont_rename_images(dir):
+def collect_images(dir):
     inifile = os.path.join(dir, "photog.ini")
     options = read_inifile(inifile)
     photos = []
-    for filename in glob("*.jpg", root_dir=dir) + glob("*.avif", root_dir=dir):
+
+    # Generate missing AVIFs.
+    for filename in glob("*.jpg", root_dir=dir):
+        basename = filename.split(".", maxsplit=1)[0]
+        avif = basename + ".avif"
+        if not os.path.exists(os.path.join(dir, avif)):
+            print(f"Converting {filename} to AVIF...")
+            with Image.open(os.path.join(dir, filename)) as im:
+                try:
+                    exif = im.info["exif"]
+                except Exception:
+                    exif = None
+                im.save(os.path.join(dir, avif), quality=Q, exif=exif)
+
+    # Collect existing AVIFs.
+    for filename in glob("*.avif", root_dir=dir):
         photos.append(
             {
                 "filename": filename,
@@ -88,24 +104,23 @@ def generate_index(dir, photos):
     for image in photos:
         print(".", end="", flush=True)
         filename = image["filename"]
-        path = os.path.join(dir, filename)
         thumbnail = os.path.join("thumbnails", filename)
 
         # Create thumbnail.
-        with Image.open(path) as im:
+        with Image.open(os.path.join(dir, filename)) as im:
             original_width, original_height = im.size
 
             try:
                 exif = im.info["exif"]
-            except Exception as e:
-                raise Exception(f"{path} has no EXIF, please re-export.") from e
+            except Exception:
+                exif = None
 
             try:
                 im.thumbnail((99999, S))
             except Exception as e:
-                raise Exception(f"{path} is corrupt, please re-export.") from e
+                raise Exception(f"{filename} is corrupt, please re-export.") from e
 
-            # Apply *very* gentle output sharpening.
+            # Apply *very* gentle thumbnail output sharpening.
             im = im.filter(
                 ImageFilter.UnsharpMask(
                     radius=1,
@@ -113,11 +128,11 @@ def generate_index(dir, photos):
                     threshold=0,
                 )
             )
-            im.save(os.path.join(dir, thumbnail), quality=80, exif=exif)
+            im.save(os.path.join(dir, thumbnail), quality=Q, exif=exif)
 
         # Add original to zip archive.
         if options.get("zip", True):
-            zipfile.write(path, filename)
+            zipfile.write(os.path.join(dir, filename), filename)
 
         image.update(
             {

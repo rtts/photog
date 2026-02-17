@@ -9,7 +9,6 @@ from zipfile import ZipFile
 from jinja2 import Template
 from PIL import Image, ImageFilter
 
-Q = 50
 S = 500
 TEMPLATE_NAME = "template.html"
 
@@ -62,7 +61,7 @@ def collect_images(dir):
                     exif = im.info["exif"]
                 except Exception:
                     exif = None
-                im.save(os.path.join(dir, avif), quality=Q, exif=exif)
+                im.save(os.path.join(dir, avif), exif=exif)
 
     # Collect existing AVIFs.
     for filename in glob("*.avif", root_dir=dir):
@@ -91,10 +90,12 @@ def generate_index(dir, photos):
     inifile = os.path.join(dir, "photog.ini")
     options = read_inifile(inifile)
     zippath = os.path.join(dir, "all.zip")
+    if os.path.exists(zippath):
+        os.remove(zippath)
+
+    zipfile = None
     if options.get("zip", True):
         zipfile = ZipFile(zippath, "w")
-    elif os.path.exists(zippath):
-        os.remove(zippath)
 
     shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
     if photos:
@@ -128,10 +129,10 @@ def generate_index(dir, photos):
                     threshold=0,
                 )
             )
-            im.save(os.path.join(dir, thumbnail), quality=Q, exif=exif)
+            im.save(os.path.join(dir, thumbnail), exif=exif)
 
         # Add original to zip archive.
-        if options.get("zip", True):
+        if zipfile is not None:
             zipfile.write(os.path.join(dir, filename), filename)
 
         image.update(
@@ -148,7 +149,7 @@ def generate_index(dir, photos):
     if photos:
         print()
 
-    if options.get("zip", True):
+    if zipfile is not None:
         print("Writing zipfile...")
         zipfile.close()
 

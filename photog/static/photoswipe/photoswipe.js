@@ -2774,7 +2774,7 @@ var _getItemAt,
 				}
 
 				if (zoomLevel > 1) {
-					zoomLevel = 1;
+					//zoomLevel = 1;
 				}
 
 				item.initialZoomLevel = zoomLevel;

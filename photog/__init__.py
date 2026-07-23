@@ -132,7 +132,7 @@ def generate_index(dir, photos):
             original_width, original_height = im.size
 
             try:
-                exif = im.info["exif"]
+                exif = im.getexif()
             except Exception:
                 exif = None
 

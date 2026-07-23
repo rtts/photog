@@ -97,7 +97,7 @@ def generate_index(dir, photos):
     if options.get("zip", True):
         zipfile = ZipFile(zippath, "w")
 
-    #shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
+    # shutil.rmtree(os.path.join(dir, "thumbnails"), ignore_errors=True)
     if photos:
         os.makedirs(os.path.join(dir, "thumbnails"), exist_ok=True)
         print("Generating thumbnails", end="", flush=True)
@@ -106,6 +106,10 @@ def generate_index(dir, photos):
         print(".", end="", flush=True)
         filename = image["filename"]
         thumbnail = os.path.join("thumbnails", filename)
+
+        # Add original to zip archive.
+        if zipfile is not None:
+            zipfile.write(os.path.join(dir, filename), filename)
 
         # Don't create thumbnail.
         if os.path.exists(thumbnail):
@@ -146,10 +150,6 @@ def generate_index(dir, photos):
                 )
             )
             im.save(os.path.join(dir, thumbnail), exif=exif)
-
-        # Add original to zip archive.
-        if zipfile is not None:
-            zipfile.write(os.path.join(dir, filename), filename)
 
         image.update(
             {
